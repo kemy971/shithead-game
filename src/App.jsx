@@ -15,6 +15,7 @@ import FinishedScreen from "./components/FinishedScreen";
 import DealScreen from "./components/DealScreen";
 import OnlineLobby from "./components/OnlineLobby";
 import useOnlineGame from "./hooks/useOnlineGame";
+import RulesModal from "./components/RulesModal";
 
 // ── Online Game wrapper ───────────────────────────────────────────────────────
 function OnlineGame({ onBackToMenu }) {
@@ -31,6 +32,7 @@ function OnlineGame({ onBackToMenu }) {
 
   const [selectedCards, setSelectedCards] = useState([]);
   const [flyingCards, setFlyingCards]     = useState([]);
+  const [showRules, setShowRules]         = useState(false);
   const discardRef = useRef(null);
   const cardRefs   = useRef({});
 
@@ -240,6 +242,8 @@ function OnlineGame({ onBackToMenu }) {
       padding: "12px 24px 16px", fontFamily: "'Georgia',serif",
       position: "relative", overflow: "hidden", userSelect: "none",
     }}>
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+
       {/* Tapis */}
       <div style={{
         position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
@@ -337,6 +341,19 @@ function OnlineGame({ onBackToMenu }) {
       {/* Journal */}
       <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
         <GameLog log={state.log} />
+      </div>
+
+      {/* Bouton règles */}
+      <div style={{ position: "fixed", top: 12, left: 16, zIndex: 20 }}>
+        <button
+          onClick={() => setShowRules(true)}
+          style={{
+            background: "rgba(212,160,23,0.08)", border: "1px solid rgba(212,160,23,0.25)",
+            borderRadius: 20, width: 44, height: 44, fontSize: 18, color: "#d4a017",
+            cursor: "pointer", fontFamily: "'Georgia',serif", display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}
+        >?</button>
       </div>
 
       {/* Bouton hôte : terminer la partie */}
@@ -487,6 +504,7 @@ function LocalGame({ onBackToMenu }) {
   const [selectedCards, setSelectedCards] = useState([]);
   const [botThinking, setBotThinking] = useState(false);
   const [flyingCards, setFlyingCards] = useState([]);
+  const [showRules, setShowRules]   = useState(false);
   const discardRef = useRef(null);
   const cardRefs   = useRef({});
 
@@ -664,6 +682,7 @@ function LocalGame({ onBackToMenu }) {
         backgroundImage: `radial-gradient(circle at 50% 50%,rgba(20,60,20,0.4),transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.005) 2px,rgba(255,255,255,0.005) 3px),repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,0.005) 2px,rgba(255,255,255,0.005) 3px)`,
       }} />
 
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
       {state.status === "setup" && <SetupScreen state={state} onSwap={handleSwap} onConfirm={handleConfirmSetup} />}
       {state.status === "finished" && <FinishedScreen state={state} onRestart={() => setState(null)} />}
 
@@ -746,6 +765,18 @@ function LocalGame({ onBackToMenu }) {
 
       <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
         <GameLog log={state.log} />
+      </div>
+
+      <div style={{ position: "fixed", top: 12, left: 16, zIndex: 20 }}>
+        <button
+          onClick={() => setShowRules(true)}
+          style={{
+            background: "rgba(212,160,23,0.08)", border: "1px solid rgba(212,160,23,0.25)",
+            borderRadius: 20, width: 44, height: 44, fontSize: 18, color: "#d4a017",
+            cursor: "pointer", fontFamily: "'Georgia',serif", display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}
+        >?</button>
       </div>
 
       <div style={{ position: "fixed", top: 12, right: 16, zIndex: 20 }}>
@@ -889,6 +920,7 @@ function LocalGame({ onBackToMenu }) {
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function ShitheadGame() {
   const [mode, setMode] = useState(null); // null | "local" | "online"
+  const [showRules, setShowRules] = useState(false);
 
   if (mode === "local")  return <LocalGame  onBackToMenu={() => setMode(null)} />;
   if (mode === "online") return <OnlineGame onBackToMenu={() => setMode(null)} />;
@@ -900,6 +932,7 @@ export default function ShitheadGame() {
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       gap: 40, fontFamily: "'Georgia',serif",
     }}>
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, backgroundImage: "radial-gradient(circle at 50% 50%,rgba(30,80,30,0.3),transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
         <div style={{ fontSize: 60, marginBottom: 8 }}>🃏</div>
@@ -934,6 +967,19 @@ export default function ShitheadGame() {
           onMouseLeave={e => { e.currentTarget.style.background = "rgba(126,200,160,0.08)"; e.currentTarget.style.boxShadow = "none"; }}
         >
           EN LIGNE
+        </button>
+        <button
+          onClick={() => setShowRules(true)}
+          style={{
+            background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 30, padding: "10px 40px", fontSize: 13, color: "rgba(255,255,255,0.35)",
+            cursor: "pointer", letterSpacing: 2, fontFamily: "'Georgia',serif",
+            transition: "all 0.2s", width: 260,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+        >
+          RÈGLES DU JEU
         </button>
       </div>
     </div>
