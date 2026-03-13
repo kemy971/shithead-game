@@ -22,6 +22,10 @@ const CSS = `
   0%,100% { opacity:1; }
   40%      { opacity:0.1; box-shadow:0 0 40px rgba(255,80,0,0.9); }
 }
+.hand-scroll { overflow-x:auto; overflow-y:visible; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.hand-scroll::-webkit-scrollbar { display:none; }
+@media (min-width:640px) { .game-log-wrap { display:block !important; } }
+@media (max-width:639px) { .game-log-wrap { display:none !important; } }
 `;
 
 if (typeof document !== "undefined" && !document.getElementById("sh-css")) {
