@@ -6,13 +6,14 @@ export default function FaceDownCard({ card, isPlayable, selected, onClick, disa
   const [revealed, setRevealed] = useState(false);
 
   const handleClick = () => {
-    if (disabled) return;
-    if (!revealed && !flipping) {
-      setFlipping(true);
-      setTimeout(() => { setRevealed(true); setFlipping(false); }, 260);
-    } else if (revealed) {
-      onClick && onClick();
-    }
+    if (disabled || flipping || revealed) return;
+    setFlipping(true);
+    setTimeout(() => {
+      setRevealed(true);
+      setFlipping(false);
+      // Laisser le joueur voir la carte 600ms avant de jouer
+      setTimeout(() => { onClick && onClick(); }, 600);
+    }, 260);
   };
 
   return (

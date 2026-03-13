@@ -1,10 +1,10 @@
 import { useState } from "react";
 import PlayingCard from "./PlayingCard";
 
-export default function SetupScreen({ state, onSwap, onConfirm }) {
+export default function SetupScreen({ state, onSwap, onConfirm, playerIndex = 0 }) {
   const [selHand, setSelHand] = useState(null);
   const [selFU, setSelFU] = useState(null);
-  const player = state.players[0];
+  const player = state.players[playerIndex];
 
   const onHand = c => {
     if (selFU) { onSwap(c.id, selFU.id); setSelHand(null); setSelFU(null); }
