@@ -338,8 +338,8 @@ function OnlineGame({ onBackToMenu }) {
         </div>
       </div>
 
-      {/* Journal */}
-      <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
+      {/* Journal — masqué sur mobile */}
+      <div className="game-log-wrap" style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
         <GameLog log={state.log} />
       </div>
 
@@ -440,23 +440,25 @@ function OnlineGame({ onBackToMenu }) {
         )}
 
         {human.phase === "hand" && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", maxWidth: 600 }}>
-            {human.handCards.filter(c => !flyingCardIds.has(c.id)).map(c => {
-              const handGroup = human.handCards.filter(x => x.value === c.value);
-              const playable = isMyTurn && canPlayGroup(handGroup, state, human.handCards);
-              const sel = selectedCards.some(s => s.id === c.id);
-              return (
-                <div key={c.id} ref={el => { if (el) cardRefs.current[c.id] = el; }}>
-                  <PlayingCard
-                    card={c} selected={sel}
-                    onClick={isMyTurn ? () => toggleCard(c) : undefined}
-                    onDoubleClick={playable ? () => handleDoubleClickPlay(c) : undefined}
-                    disabled={!isMyTurn}
-                    glow={playable && !sel && isMyTurn}
-                  />
-                </div>
-              );
-            })}
+          <div className="hand-scroll" style={{ width: "100%", maxWidth: 600 }}>
+            <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", justifyContent: "center", padding: "20px 16px 12px" }}>
+              {human.handCards.filter(c => !flyingCardIds.has(c.id)).map(c => {
+                const handGroup = human.handCards.filter(x => x.value === c.value);
+                const playable = isMyTurn && canPlayGroup(handGroup, state, human.handCards);
+                const sel = selectedCards.some(s => s.id === c.id);
+                return (
+                  <div key={c.id} ref={el => { if (el) cardRefs.current[c.id] = el; }} style={{ flexShrink: 0 }}>
+                    <PlayingCard
+                      card={c} selected={sel}
+                      onClick={isMyTurn ? () => toggleCard(c) : undefined}
+                      onDoubleClick={playable ? () => handleDoubleClickPlay(c) : undefined}
+                      disabled={!isMyTurn}
+                      glow={playable && !sel && isMyTurn}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -763,7 +765,7 @@ function LocalGame({ onBackToMenu }) {
         </div>
       </div>
 
-      <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
+      <div className="game-log-wrap" style={{ position: "fixed", bottom: 16, right: 16, zIndex: 20 }}>
         <GameLog log={state.log} />
       </div>
 
@@ -861,23 +863,25 @@ function LocalGame({ onBackToMenu }) {
         )}
 
         {human.phase === "hand" && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", maxWidth: 600 }}>
-            {human.handCards.map(c => {
-              const handGroup = human.handCards.filter(x => x.value === c.value);
-              const playable = isMyTurn && canPlayGroup(handGroup, state, human.handCards);
-              const sel = selectedCards.some(s => s.id === c.id);
-              return (
-                <div key={c.id} ref={el => { if (el) cardRefs.current[c.id] = el; }}>
-                  <PlayingCard
-                    card={c} selected={sel}
-                    onClick={isMyTurn ? () => toggleCard(c) : undefined}
-                    onDoubleClick={playable ? () => handleDoubleClickPlay(c) : undefined}
-                    disabled={!isMyTurn}
-                    glow={playable && !sel && isMyTurn}
-                  />
-                </div>
-              );
-            })}
+          <div className="hand-scroll" style={{ width: "100%", maxWidth: 600 }}>
+            <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", justifyContent: "center", padding: "20px 16px 12px" }}>
+              {human.handCards.map(c => {
+                const handGroup = human.handCards.filter(x => x.value === c.value);
+                const playable = isMyTurn && canPlayGroup(handGroup, state, human.handCards);
+                const sel = selectedCards.some(s => s.id === c.id);
+                return (
+                  <div key={c.id} ref={el => { if (el) cardRefs.current[c.id] = el; }} style={{ flexShrink: 0 }}>
+                    <PlayingCard
+                      card={c} selected={sel}
+                      onClick={isMyTurn ? () => toggleCard(c) : undefined}
+                      onDoubleClick={playable ? () => handleDoubleClickPlay(c) : undefined}
+                      disabled={!isMyTurn}
+                      glow={playable && !sel && isMyTurn}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -919,7 +923,11 @@ function LocalGame({ onBackToMenu }) {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function ShitheadGame() {
-  const [mode, setMode] = useState(null); // null | "local" | "online"
+  const [mode, setMode] = useState(() => {
+    // Si l'URL contient ?room=, aller directement en mode online
+    const params = new URLSearchParams(window.location.search);
+    return params.get("room") ? "online" : null;
+  });
   const [showRules, setShowRules] = useState(false);
 
   if (mode === "local")  return <LocalGame  onBackToMenu={() => setMode(null)} />;

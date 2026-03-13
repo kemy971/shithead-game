@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const btnBase = {
   borderRadius: 30, padding: "12px 32px", fontSize: 14, fontWeight: 700,
@@ -19,14 +19,36 @@ export default function OnlineLobby({
 }) {
   const [pseudo, setPseudo]   = useState("");
   const [code, setCode]       = useState("");
-  const [view, setView]       = useState("home"); // "home"|"create"|"join"|"waiting"
+  const [view, setView]       = useState("home"); // "home"|"create"|"join"|"join-link"|"waiting"
   const [max, setMax]         = useState(2);
 
   const inLobby = roomStatus === "waiting";
 
+  // ── Lien d'invitation : lire ?room= à l'arrivée ──────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get("room");
+    if (roomParam && roomParam.length === 6) {
+      setCode(roomParam.toUpperCase());
+      setView("join-link");
+      // Nettoyer l'URL sans recharger
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   // ── Copy room code ────────────────────────────────────────────────────────
   const copyCode = () => {
     if (roomId) navigator.clipboard?.writeText(roomId).catch(() => {});
+  };
+
+  // ── Copy invite link ──────────────────────────────────────────────────────
+  const [copied, setCopied] = useState(false);
+  const copyLink = () => {
+    if (!roomId) return;
+    const url = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   // ── Waiting room ──────────────────────────────────────────────────────────
@@ -52,7 +74,19 @@ export default function OnlineLobby({
             >
               {roomId}
             </div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>Cliquez pour copier</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>Cliquez pour copier le code</div>
+            <button
+              onClick={copyLink}
+              style={{
+                marginTop: 10, ...btnBase,
+                background: copied ? "rgba(126,200,160,0.15)" : "rgba(255,255,255,0.06)",
+                border: `1px solid ${copied ? "rgba(126,200,160,0.4)" : "rgba(255,255,255,0.12)"}`,
+                color: copied ? "#7ec8a0" : "rgba(255,255,255,0.5)",
+                fontSize: 12, padding: "8px 20px",
+              }}
+            >
+              {copied ? "✓ LIEN COPIÉ !" : "🔗 COPIER LE LIEN D'INVITATION"}
+            </button>
           </div>
 
           <div style={{ width: "100%", marginBottom: 8 }}>
@@ -154,6 +188,57 @@ export default function OnlineLobby({
               }}
             >
               CRÉER
+            </button>
+            <button onClick={() => setView("home")} style={{ ...btnBase, background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}>
+              RETOUR
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Join via lien (code pré-rempli) ──────────────────────────────────────
+  if (view === "join-link") {
+    return (
+      <div style={overlay}>
+        <div style={card}>
+          <div style={{ fontSize: 48, marginBottom: 4 }}>🔗</div>
+          <div style={title}>REJOINDRE LA SALLE</div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: 3, marginBottom: 6 }}>CODE</div>
+            <div style={{
+              display: "inline-block", background: "rgba(212,160,23,0.12)",
+              border: "1px solid rgba(212,160,23,0.4)", borderRadius: 12,
+              padding: "8px 20px", fontSize: 22, fontWeight: 700, color: "#d4a017", letterSpacing: 6,
+            }}>
+              {code}
+            </div>
+          </div>
+          <div style={{ width: "100%" }}>
+            <input
+              style={inputStyle}
+              placeholder="Votre pseudo"
+              value={pseudo}
+              maxLength={16}
+              onChange={e => setPseudo(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && pseudo.trim() && onJoinRoom(pseudo.trim(), code)}
+              autoFocus
+            />
+          </div>
+          {error && <div style={errStyle}>{error}</div>}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
+            <button
+              onClick={() => pseudo.trim() && onJoinRoom(pseudo.trim(), code)}
+              disabled={!pseudo.trim()}
+              style={{
+                ...btnBase,
+                background: pseudo.trim() ? "linear-gradient(135deg,#7ec8a0,#3a8a60)" : "rgba(255,255,255,0.05)",
+                color: pseudo.trim() ? "#031a0a" : "rgba(255,255,255,0.2)",
+                cursor: pseudo.trim() ? "pointer" : "not-allowed",
+              }}
+            >
+              REJOINDRE
             </button>
             <button onClick={() => setView("home")} style={{ ...btnBase, background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}>
               RETOUR
